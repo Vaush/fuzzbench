@@ -51,5 +51,6 @@ def test_output_report_filestore(fs, experiment):
                 reports_dir,
                 report_name=experiment_name,
                 coverage_report=False,
+                differential_graphs=False,
                 in_progress=False,
                 merge_with_clobber_nonprivate=False)
