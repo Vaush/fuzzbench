@@ -1,0 +1,4 @@
+commit: 32769083d1b6b1cb325409b3c9b99c06026f70d7
+commit_date: 2019-12-19 03:18:00+00:00
+fuzz_target: fuzz_disassemble
+project: binutils
