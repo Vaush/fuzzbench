@@ -1,0 +1,4 @@
+commit: feaec3bc3133ff143b8445c919f2c4c56048fdf9
+commit_date: 2019-10-18 02:01:00+00:00
+fuzz_target: ffmpeg_AV_CODEC_ID_WMALOSSLESS_fuzzer
+project: ffmpeg
