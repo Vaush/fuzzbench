@@ -1,0 +1,4 @@
+commit: a63dab446396fdc842b8b8d09779f5c8f40884ff
+commit_date: 2019-11-09 02:48:00+00:00
+fuzz_target: serializer_fuzzer
+project: firestore
