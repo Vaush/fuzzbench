@@ -1,0 +1,4 @@
+commit: 16ca898568037a5edd7c9cd63467fd871ad47020
+commit_date: 2020-05-26 05:34:00+00:00
+fuzz_target: qtbase_gui_image_qimage_loadfromdata
+project: qt
