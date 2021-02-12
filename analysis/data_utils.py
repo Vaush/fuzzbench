@@ -14,7 +14,7 @@
 """Utility functions for data (frame) transformations."""
 from analysis import stat_tests
 from common import environment
-
+import pandas as pd
 
 class EmptyDataError(ValueError):
     """An exception for when the data is empty."""
@@ -240,13 +240,61 @@ def benchmark_rank_by_average_rank(benchmark_snapshot_df, key='edges_covered'):
     avg_rank.sort_values('avg rank', ascending=False, inplace=True)
     return avg_rank['avg rank']
 
+def get_equivalent_fuzzers(posthoc_results, indices):
+    arr = posthoc_results.to_numpy()
+    equivalent_fuzzers = {}
+    for fuzzer, row in zip(indices, arr):
+        equivalent_fuzzers[fuzzer] = []
+        for candidate, val in zip(indices, row):
+            if val == -1 or not (val < stat_tests.SIGNIFICANCE_THRESHOLD):
+               equivalent_fuzzers[fuzzer].append(candidate)
+    return equivalent_fuzzers
 
-def benchmark_rank_by_stat_test_wins(benchmark_snapshot_df):
+
+def benchmark_rank_by_kruskal_test(benchmark_snapshot_df, key='edges_covered'):
+    """Returns ranking of fuzzers based on the results of a Kruskal posthoc test."""
+    assert benchmark_snapshot_df.time.nunique() == 1, 'Not a snapshot!'
+    kruskal_p_value = stat_tests.kruskal_test(benchmark_snapshot_df, key)
+    if 0 < len(benchmark_snapshot_df.index):
+        benchmark_name = benchmark_snapshot_df.iloc[0]["benchmark"]
+    else:
+        benchmark_name = "empty"
+    print(benchmark_name, "KRUSKAL P_VALUE: " + str(kruskal_p_value))
+    fuzzers = sorted(benchmark_snapshot_df.fuzzer.unique())
+    if kruskal_p_value < stat_tests.SIGNIFICANCE_THRESHOLD:
+        ph_tests = stat_tests.kruskal_posthoc_tests(benchmark_snapshot_df, key, ["wilcoxon","mann_whitney"])
+        ph_tests['dunn'].to_csv(benchmark_name + "_dunn.csv")
+        #ph_tests['mann_whitney'].to_csv(benchmark_name + "_mann_whitney.csv")
+        equivalent_fuzzers = get_equivalent_fuzzers(ph_tests['dunn'], fuzzers)
+        #print(equivalent_fuzzers)
+        ranks = benchmark_rank_by_median(benchmark_snapshot_df, key).rank()
+        #print(ranks)
+        new_ranks = {}
+        print(equivalent_fuzzers)
+        for f1 in equivalent_fuzzers:
+            partial_sum = 0
+            for f2 in equivalent_fuzzers[f1]:
+                partial_sum += ranks.loc[f2]
+            new_ranks[f1] = partial_sum/len(equivalent_fuzzers[f1])
+        for fuzzer in new_ranks:
+            ranks.loc[fuzzer] = new_ranks[fuzzer]
+    else:
+        ranks = benchmark_snapshot_df[["fuzzer"]].copy()
+        ranks['stat rank'] = (len(fuzzers)+1)/2
+        ranks = ranks.groupby("fuzzer")["stat rank"].mean()
+    
+    ranks.rename("stat rank", inplace=True)    
+    ranks.sort_values(ascending=False, inplace=True)
+    return ranks
+    
+
+
+def benchmark_rank_by_stat_test_wins(benchmark_snapshot_df, key='edges_covered'):
     """Carries out one-tailed statistical tests for each fuzzer pair.
 
     Returns ranking according to the number of statistical test wins.
     """
-    p_values = stat_tests.one_sided_u_test(benchmark_snapshot_df)
+    p_values = stat_tests.one_sided_u_test(benchmark_snapshot_df, key)
 
     # Turn "significant" p-values into 1-s.
     better_than = p_values.applymap(
@@ -281,12 +329,12 @@ def create_better_than_table(benchmark_snapshot_df):
 
 
 def experiment_pivot_table(experiment_snapshots_df,
-                           benchmark_level_ranking_function):
+                           benchmark_level_ranking_function, key='edges_covered'):
     """Creates a pivot table according to a given per benchmark ranking, where
     the columns are the fuzzers, the rows are the benchmarks, and the values
     are the scores according to the per benchmark ranking."""
     benchmark_blocks = experiment_snapshots_df.groupby('benchmark')
-    groups_ranked = benchmark_blocks.apply(benchmark_level_ranking_function)
+    groups_ranked = benchmark_blocks.apply(benchmark_level_ranking_function, key)
     already_unstacked = groups_ranked.index.names == ['benchmark']
     pivot_df = groups_ranked if already_unstacked else groups_ranked.unstack()
     return pivot_df

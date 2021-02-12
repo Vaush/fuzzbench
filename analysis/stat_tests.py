@@ -23,7 +23,7 @@ SIGNIFICANCE_THRESHOLD = 0.05
 
 def _create_p_value_table(benchmark_snapshot_df,
                           statistical_test,
-                          alternative="two-sided"):
+                          alternative="two-sided", key='edges_covered'):
     """Given a benchmark snapshot data frame and a statistical test function,
     returns a p-value table. The |alternative| parameter defines the alternative
     hypothesis to be tested. Use "two-sided" for two-tailed (default), and
@@ -40,7 +40,7 @@ def _create_p_value_table(benchmark_snapshot_df,
                                 alternative=alternative).pvalue
 
     groups = benchmark_snapshot_df.groupby('fuzzer')
-    samples = groups['edges_covered'].apply(list)
+    samples = groups[key].apply(list)
     fuzzers = samples.index
 
     data = []
@@ -62,11 +62,11 @@ def _create_p_value_table(benchmark_snapshot_df,
     return p_values
 
 
-def one_sided_u_test(benchmark_snapshot_df):
+def one_sided_u_test(benchmark_snapshot_df, key='edges_covered'):
     """Returns p-value table for one-tailed Mann-Whitney U test."""
     return _create_p_value_table(benchmark_snapshot_df,
                                  ss.mannwhitneyu,
-                                 alternative='greater')
+                                 alternative='greater', key=key)
 
 
 def two_sided_u_test(benchmark_snapshot_df):
@@ -123,37 +123,46 @@ def anova_posthoc_tests(benchmark_snapshot_df):
     return posthoc_tests
 
 
-def kruskal_test(benchmark_snapshot_df):
+def kruskal_test(benchmark_snapshot_df, val_col='edges_covered'):
     """Returns p-value for Kruskal test."""
     groups = benchmark_snapshot_df.groupby('fuzzer')
-    sample_groups = groups['edges_covered'].apply(list).values
+    sample_groups = groups[val_col].apply(list).values
 
     _, p_value = ss.kruskal(*sample_groups)
     return p_value
 
 
-def kruskal_posthoc_tests(benchmark_snapshot_df):
+def kruskal_posthoc_tests(benchmark_snapshot_df, val_col='edges_covered', exclude_tests = None):
     """Returns p-value tables for various Kruskal posthoc tests.
 
     Results should considered only if Kruskal test rejects null hypothesis.
     """
+    if exclude_tests is None:
+        exclude_tests = []
     common_args = {
         'a': benchmark_snapshot_df,
         'group_col': 'fuzzer',
-        'val_col': 'edges_covered',
+        'val_col': val_col,
         'sort': True
     }
     p_adjust = 'holm'
 
     posthoc_tests = {}
-    posthoc_tests['mann_whitney'] = sp.posthoc_mannwhitney(**common_args,
+    
+    if 'mann_whitney' not in exclude_tests:
+        posthoc_tests['mann_whitney'] = sp.posthoc_mannwhitney(**common_args,
                                                            p_adjust=p_adjust)
-    posthoc_tests['conover'] = sp.posthoc_conover(**common_args,
+    if 'conover' not in exclude_tests:
+        posthoc_tests['conover'] = sp.posthoc_conover(**common_args,
                                                   p_adjust=p_adjust)
-    posthoc_tests['wilcoxon'] = sp.posthoc_wilcoxon(**common_args,
+    if 'wilcoxon' not in exclude_tests:
+        posthoc_tests['wilcoxon'] = sp.posthoc_wilcoxon(**common_args,
                                                     p_adjust=p_adjust)
-    posthoc_tests['dunn'] = sp.posthoc_dunn(**common_args, p_adjust=p_adjust)
-    posthoc_tests['nemenyi'] = sp.posthoc_nemenyi(**common_args)
+    if 'dunn' not in exclude_tests:
+        posthoc_tests['dunn'] = sp.posthoc_dunn(**common_args, p_adjust=p_adjust)
+    
+    if 'nemenyi' not in exclude_tests:
+        posthoc_tests['nemenyi'] = sp.posthoc_nemenyi(**common_args)
 
     return posthoc_tests
 
@@ -171,6 +180,6 @@ def friedman_posthoc_tests(experiment_pivot_df):
     Results should considered only if Friedman test rejects null hypothesis.
     """
     posthoc_tests = {}
-    posthoc_tests['conover'] = sp.posthoc_conover_friedman(experiment_pivot_df)
+    posthoc_tests['conover'] = sp.posthoc_conover_friedman(experiment_pivot_df, p_adjust="holm")
     posthoc_tests['nemenyi'] = sp.posthoc_nemenyi_friedman(experiment_pivot_df)
     return posthoc_tests
