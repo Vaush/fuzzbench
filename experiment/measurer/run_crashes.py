@@ -72,23 +72,27 @@ def process_crash(app_binary, crash_testcase_path, crashes_dir):
                                  timeout=run_coverage.UNIT_TIMEOUT + 5)
     if not result.output:
         # Hang happened, no crash. Bail out.
+        print("HANG", os.path.relpath(crash_testcase_path, crashes_dir))
         return None
 
     # Process the crash stacktrace from output.
     fuzz_target = os.path.basename(app_binary)
     stack_parser = stacktraces.StackParser(fuzz_target=fuzz_target,
-                                           symbolized=True,
+                                           symbolized=False,
                                            detect_ooms_and_hangs=True,
                                            include_ubsan=True)
     crash_result = stack_parser.parse(result.output)
     if not crash_result.crash_state:
         # No crash occurred. Bail out.
+        print("NO_CRASH", os.path.relpath(crash_testcase_path, crashes_dir))
         return None
 
     if crash_result.crash_type in ('Timeout', 'Out-of-memory'):
         # Uninteresting crash types for fuzzer efficacy. Bail out.
+        print("UNINTERESTING", os.path.relpath(crash_testcase_path, crashes_dir))
         return None
-
+    
+    print("CRASH", os.path.relpath(crash_testcase_path, crashes_dir), _filter_crash_type(crash_result.crash_type)+":"+_filter_crash_state(crash_result.crash_state))
     return Crash(crash_testcase=os.path.relpath(crash_testcase_path,
                                                 crashes_dir),
                  crash_type=_filter_crash_type(crash_result.crash_type),
