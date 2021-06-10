@@ -259,7 +259,7 @@ def benchmark_rank_by_kruskal_test(benchmark_snapshot_df, key='edges_covered'):
         benchmark_name = benchmark_snapshot_df.iloc[0]["benchmark"]
     else:
         benchmark_name = "empty"
-    print(benchmark_name, "KRUSKAL P_VALUE: " + str(kruskal_p_value))
+    print("\n\n", benchmark_name, "KRUSKAL P_VALUE: " + str(kruskal_p_value))
     fuzzers = sorted(benchmark_snapshot_df.fuzzer.unique())
     if kruskal_p_value < stat_tests.SIGNIFICANCE_THRESHOLD:
         ph_tests = stat_tests.kruskal_posthoc_tests(benchmark_snapshot_df, key, ["wilcoxon","mann_whitney"])
@@ -267,8 +267,8 @@ def benchmark_rank_by_kruskal_test(benchmark_snapshot_df, key='edges_covered'):
         #ph_tests['mann_whitney'].to_csv(benchmark_name + "_mann_whitney.csv")
         equivalent_fuzzers = get_equivalent_fuzzers(ph_tests['dunn'], fuzzers)
         #print(equivalent_fuzzers)
-        ranks = benchmark_rank_by_median(benchmark_snapshot_df, key).rank()
-        #print(ranks)
+        ranks = benchmark_rank_by_median(benchmark_snapshot_df, key).rank(ascending=False)
+        print("\nRanks:\n", ranks)
         new_ranks = {}
         print(equivalent_fuzzers)
         for f1 in equivalent_fuzzers:

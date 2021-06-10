@@ -128,7 +128,10 @@ def kruskal_test(benchmark_snapshot_df, val_col='edges_covered'):
     groups = benchmark_snapshot_df.groupby('fuzzer')
     sample_groups = groups[val_col].apply(list).values
 
-    _, p_value = ss.kruskal(*sample_groups)
+    try:
+        _, p_value = ss.kruskal(*sample_groups)
+    except ValueError:
+        return 1.0
     return p_value
 
 
