@@ -1,6 +1,9 @@
 from analysis import plotting, data_utils, experiment_results, coverage_data_utils
 import os
 import pandas as pd
+import sys
+import matplotlib.pyplot as plt
+import numpy as np
 report_directory = "/home/vaush/Work/temp_reports_02_06_2021/"
 data_path = os.path.join(report_directory, 'data.csv.gz')
 experiment_df = pd.read_csv(data_path)
@@ -8,8 +11,15 @@ description = "from cached data"
 data_utils.validate_data(experiment_df)
 experiment_df = data_utils.add_bugs_covered_column(experiment_df)
 fuzzers = ['afl', 'aflfast', 'aflsmart', 'aflplusplus', 'mopt', 'entropic', 'fairfuzz', 'libfuzzer', 'honggfuzz']
-
 experiment_df = data_utils.filter_fuzzers(experiment_df, fuzzers)
+benchmarks = experiment_df.benchmark.unique()
+benchmarks = list(benchmarks)
+if len(sys.argv) > 1 and sys.argv[1] == "compress":
+    benchmarks.remove("njs_njs_process_script_fuzzer")
+    benchmarks.remove("proj4_standard_fuzzer")
+    benchmarks.remove("tpm2_tpm2_execute_command_fuzzer")
+    benchmarks.remove("libarchive_libarchive_fuzzer")
+experiment_df = data_utils.filter_benchmarks(experiment_df, benchmarks)
 coverage_report = False
 coverage_dict = {}
 if coverage_report:
@@ -40,6 +50,8 @@ groups_ranked = benchmark_blocks.apply(data_utils.benchmark_rank_by_median, 'bug
 pivot_median = groups_ranked.unstack()
 groups_ranked = benchmark_blocks.apply(data_utils.benchmark_rank_by_mean, 'bugs_covered')
 pivot_average = groups_ranked.unstack()
-pivot_kruskal.to_csv(os.path.join(report_directory, 'kruskal.csv'))
-pivot_median.to_csv(os.path.join(report_directory, 'median.csv'))
-pivot_average.to_csv(os.path.join(report_directory, 'mean.csv'))
+#fig, ax = plt.subplots()
+ax = pivot_median.plot()
+ax.set_xticks(np.arange(len(experiment_snapshots_df.benchmark.unique())))
+ax.set_xticklabels(experiment_snapshots_df.benchmark.unique())
+plt.show()

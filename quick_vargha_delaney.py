@@ -31,12 +31,14 @@ def f(arg):
 from analysis import plotting, data_utils, experiment_results, coverage_data_utils
 import os
 import pandas as pd
-report_directory = "/home/vaush/Work/temp_reports/"
+report_directory = "/home/vaush/Work/temp_reports_02_06_2021/"
 data_path = os.path.join(report_directory, 'data.csv.gz')
 experiment_df = pd.read_csv(data_path)
 description = "from cached data"
 data_utils.validate_data(experiment_df)
 experiment_df = data_utils.add_bugs_covered_column(experiment_df)
+fuzzers = ["afl", "aflfast", "aflplusplus", "aflsmart", "entropic", "fairfuzz", "honggfuzz", "libfuzzer", "mopt"]
+experiment_df = data_utils.filter_fuzzers(experiment_df, fuzzers)
 coverage_report = False
 coverage_dict = {}
 if coverage_report:
@@ -49,8 +51,17 @@ experiment_ctx = experiment_results.ExperimentResults(
         coverage_dict,
         report_directory,
         plotter,
-        "2020-12-19-bug")
-experiment_snapshots_df = experiment_ctx._experiment_snapshots_df
+        "joined_experiment")
+grouping1 = ['fuzzer', 'benchmark', 'trial_id', 'crash_key']
+grouping2 = ['fuzzer', 'benchmark', 'trial_id']
+grouping3 = ['fuzzer', 'benchmark', 'trial_id', 'time']
+df = experiment_df.sort_values(grouping3)
+df2 = df.groupby(grouping2).time.max()
+l = list(list(zip(*(df2[df2 != 82800].index)))[2])
+df = df[~df.trial_id.isin(l)]
+df = df[df.time == 82800]
+experiment_snapshots_df = df
+experiment_snapshots_df['benchmark'] = experiment_snapshots_df['benchmark'].apply(lambda x: "php-execute" if ("php-fuzz-execute" in x) else ("php-parser" if ("php-fuzz-parser" in x) else str(x).split("_")[0]))
 benchmark_blocks = experiment_snapshots_df.groupby('benchmark')
 groups_ranked = benchmark_blocks.apply(f)
 
