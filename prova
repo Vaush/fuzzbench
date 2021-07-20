@@ -1,0 +1,33 @@
+docker build \
+--tag gcr.io/fuzzbench/builders/benchmark/proj4_standard_fuzzer \
+--build-arg BUILDKIT_INLINE_CACHE=1 \
+--cache-from gcr.io/fuzzbench/builders/benchmark/proj4_standard_fuzzer \
+--file benchmarks/proj4_standard_fuzzer/Dockerfile \
+benchmarks/proj4_standard_fuzzer
+docker build \
+--tag gcr.io/fuzzbench/builders/lafintel/proj4_standard_fuzzer-intermediate \
+--build-arg BUILDKIT_INLINE_CACHE=1 \
+--cache-from gcr.io/fuzzbench/builders/lafintel/proj4_standard_fuzzer-intermediate \
+--build-arg parent_image=gcr.io/fuzzbench/builders/benchmark/proj4_standard_fuzzer \
+--file fuzzers/lafintel/builder.Dockerfile \
+fuzzers/lafintel
+docker pull ubuntu:xenial
+xenial: Pulling from library/ubuntu
+Digest: sha256:eed7e1076bbc1f342c4474c718e5438af4784f59a4e88ad687dbb98483b59ee4
+Status: Image is up to date for ubuntu:xenial
+docker.io/library/ubuntu:xenial
+docker build \
+--tag gcr.io/fuzzbench/base-image \
+--build-arg BUILDKIT_INLINE_CACHE=1 \
+--cache-from gcr.io/fuzzbench/base-image \
+--file docker/base-image/Dockerfile \
+.
+docker build \
+--tag gcr.io/fuzzbench/builders/lafintel/proj4_standard_fuzzer \
+--build-arg BUILDKIT_INLINE_CACHE=1 \
+--cache-from gcr.io/fuzzbench/builders/lafintel/proj4_standard_fuzzer \
+--build-arg benchmark=proj4_standard_fuzzer \
+--build-arg fuzzer=lafintel \
+--build-arg parent_image=gcr.io/fuzzbench/builders/lafintel/proj4_standard_fuzzer-intermediate \
+--file docker/benchmark-builder/Dockerfile \
+.

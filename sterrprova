@@ -1,0 +1,248 @@
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 38B done
+#2 DONE 0.0s
+
+#1 [internal] load .dockerignore
+#1 transferring context: 2B done
+#1 DONE 0.0s
+
+#3 [internal] load metadata for gcr.io/oss-fuzz-base/base-builder@sha256:fe...
+#3 DONE 0.0s
+
+#4 [1/5] FROM gcr.io/oss-fuzz-base/base-builder@sha256:feba7413854d6d8fffbe...
+#4 DONE 0.0s
+
+#10 importing cache manifest from gcr.io/fuzzbench/builders/benchmark/proj4_...
+#10 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 30B done
+#8 DONE 0.0s
+
+#7 [4/5] WORKDIR proj.4
+#7 CACHED
+
+#5 [2/5] RUN apt-get update && apt-get install -y make autoconf automake li...
+#5 CACHED
+
+#6 [3/5] RUN git clone --depth 1 https://github.com/OSGeo/proj.4 proj.4
+#6 CACHED
+
+#9 [5/5] COPY build.sh /src/
+#9 CACHED
+
+#11 exporting to image
+#11 exporting layers done
+#11 writing image sha256:955aff31e6134e071e39c4fb9f105c1eae06f0e8b79f8d294f0ff9aeb30cf802 done
+#11 naming to gcr.io/fuzzbench/builders/benchmark/proj4_standard_fuzzer done
+#11 DONE 0.0s
+
+#12 exporting cache
+#12 preparing build cache for export done
+#12 DONE 0.0s
+#2 [internal] load build definition from builder.Dockerfile
+#2 transferring dockerfile: 46B done
+#2 DONE 0.0s
+
+#1 [internal] load .dockerignore
+#1 transferring context: 2B done
+#1 DONE 0.0s
+
+#3 [internal] load metadata for gcr.io/fuzzbench/builders/benchmark/proj4_s...
+#3 DONE 0.0s
+
+#8 [1/5] FROM gcr.io/fuzzbench/builders/benchmark/proj4_standard_fuzzer
+#8 DONE 0.0s
+
+#9 importing cache manifest from gcr.io/fuzzbench/builders/lafintel/proj4_s...
+#9 DONE 0.0s
+
+#5 [3/5] RUN wget https://storage.googleapis.com/fuzzbench-files/afl-2.26b....
+#5 CACHED
+
+#4 [2/5] RUN apt-get update -y &&     apt-get -y install llvm-3.8     clang...
+#4 CACHED
+
+#6 [4/5] RUN cd /afl/llvm_mode &&     wget https://gitlab.com/laf-intel/laf...
+#6 CACHED
+
+#7 [5/5] RUN wget https://raw.githubusercontent.com/llvm/llvm-project/5feb8...
+#7 CACHED
+
+#10 exporting to image
+#10 exporting layers done
+#10 writing image sha256:8c9b790b19ed5418957466ebe92865e8381c8030d71740b81b9944de5495161f done
+#10 naming to gcr.io/fuzzbench/builders/lafintel/proj4_standard_fuzzer-intermediate done
+#10 DONE 0.0s
+
+#11 exporting cache
+#11 preparing build cache for export done
+#11 DONE 0.0s
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 2.00kB done
+#2 DONE 0.0s
+
+#1 [internal] load .dockerignore
+#1 transferring context: 34B done
+#1 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/ubuntu:xenial
+#3 DONE 0.0s
+
+#4 importing cache manifest from gcr.io/fuzzbench/base-image
+#4 DONE 0.0s
+
+#5 [1/7] FROM docker.io/library/ubuntu:xenial
+#5 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 562B 0.0s done
+#8 DONE 0.0s
+
+#10 [5/7] RUN pip3 install -r /requirements.txt
+#10 CACHED
+
+#11 [6/7] RUN apt-get update -y && apt-get install -y     apt-transport-http...
+#11 CACHED
+
+#9 [4/7] COPY ./requirements.txt /
+#9 CACHED
+
+#6 [2/7] RUN apt-get update -y && apt-get install -y     build-essential   ...
+#6 CACHED
+
+#7 [3/7] RUN cd /tmp/ &&     curl -O https://www.python.org/ftp/python/3.8....
+#7 CACHED
+
+#12 [7/7] RUN CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" &&     echo "d...
+#12 CACHED
+
+#13 exporting to image
+#13 exporting layers done
+#13 writing image sha256:9325b940edb42df5b6c3206c4512f44079b31d9b439462bb9958e692aae3f49a done
+#13 naming to gcr.io/fuzzbench/base-image done
+#13 DONE 0.0s
+
+#14 exporting cache
+#14 preparing build cache for export done
+#14 DONE 0.0s
+#2 [internal] load .dockerignore
+#2 transferring context: 34B done
+#2 DONE 0.0s
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.98kB done
+#1 DONE 0.0s
+
+#4 [internal] load metadata for gcr.io/fuzzbench/base-image:latest
+#4 DONE 0.0s
+
+#3 [internal] load metadata for gcr.io/fuzzbench/builders/lafintel/proj4_st...
+#3 DONE 0.0s
+
+#12 [internal] load build context
+#12 DONE 0.0s
+
+#7 [base-image 1/1] FROM gcr.io/fuzzbench/base-image
+#7 DONE 0.0s
+
+#6 [stage-1 1/12] FROM gcr.io/fuzzbench/builders/lafintel/proj4_standard_fu...
+#6 DONE 0.0s
+
+#5 importing cache manifest from gcr.io/fuzzbench/builders/lafintel/proj4_s...
+#5 ERROR: gcr.io/fuzzbench/builders/lafintel/proj4_standard_fuzzer:latest not found
+
+#12 [internal] load build context
+#12 transferring context: 372.58kB 0.0s done
+#12 DONE 0.0s
+
+#15 [stage-1 8/12] COPY benchmarks/proj4_standard_fuzzer/benchmark.yaml /
+#15 CACHED
+
+#17 [stage-1 10/12] COPY docker/benchmark-builder/checkout_commit.py /opt/fu...
+#17 CACHED
+
+#13 [stage-1 6/12] COPY fuzzers /src/fuzzers
+#13 CACHED
+
+#8 [stage-1 2/12] COPY --from=base-image /usr/local/bin/python3* /usr/local...
+#8 CACHED
+
+#10 [stage-1 4/12] COPY --from=base-image /usr/local/include/python3.8 /usr/...
+#10 CACHED
+
+#11 [stage-1 5/12] COPY --from=base-image /usr/local/lib/python3.8/site-pack...
+#11 CACHED
+
+#14 [stage-1 7/12] RUN touch /src/__init__.py
+#14 CACHED
+
+#9 [stage-1 3/12] COPY --from=base-image /usr/local/lib/python3.8 /usr/loca...
+#9 CACHED
+
+#16 [stage-1 9/12] RUN mkdir /opt/fuzzbench/
+#16 CACHED
+
+#18 [stage-1 11/12] RUN export CHECKOUT_COMMIT=$(cat /benchmark.yaml | tr -d...
+#18 CACHED
+
+#19 [stage-1 12/12] RUN PYTHONPATH=/src python3 -u -c "from fuzzers import u...
+#19 0.245 FUZZ_TARGET = standard_fuzzer
+#19 0.245 CFLAGS = -fsanitize=address -fsanitize=array-bounds,bool,builtin,enum,float-divide-by-zero,function,integer-divide-by-zero,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,unreachable,vla-bound,vptr -O1
+#19 0.245 CXXFLAGS = -fsanitize=address -fsanitize=array-bounds,bool,builtin,enum,float-divide-by-zero,function,integer-divide-by-zero,null,object-size,return,returns-nonnull-attribute,shift,signed-integer-overflow,unreachable,vla-bound,vptr -stdlib=libc++ -O1
+#19 0.248 Building benchmark proj4_standard_fuzzer with fuzzer lafintel
+#19 0.250 + ./autogen.sh
+#19 0.252 Running aclocal
+#19 1.037 Running autoheader
+#19 1.316 Running libtoolize
+#19 1.422 libtoolize: putting auxiliary files in AC_CONFIG_AUX_DIR, '.'.
+#19 1.422 libtoolize: copying file './ltmain.sh'
+#19 1.434 libtoolize: putting macros in AC_CONFIG_MACRO_DIRS, 'm4'.
+#19 1.434 libtoolize: copying file 'm4/libtool.m4'
+#19 1.453 libtoolize: copying file 'm4/ltoptions.m4'
+#19 1.472 libtoolize: copying file 'm4/ltsugar.m4'
+#19 1.490 libtoolize: copying file 'm4/ltversion.m4'
+#19 1.510 libtoolize: copying file 'm4/lt~obsolete.m4'
+#19 1.529 Running automake
+#19 1.884 configure.ac:14: installing './compile'
+#19 1.885 configure.ac:20: installing './config.guess'
+#19 1.887 configure.ac:20: installing './config.sub'
+#19 1.888 configure.ac:10: installing './install-sh'
+#19 1.889 configure.ac:10: installing './missing'
+#19 2.088 src/Makefile.am: installing './depcomp'
+#19 2.101 parallel-tests: installing './test-driver'
+#19 2.294 Running autoconf
+#19 2.490 ======================================
+#19 2.490 Now you are ready to run './configure'
+#19 2.490 ======================================
+#19 2.490 + ./configure --disable-shared
+#19 2.558 checking for a BSD-compatible install... /usr/bin/install -c
+#19 2.563 checking whether build environment is sane... yes
+#19 2.569 checking for a thread-safe mkdir -p... /bin/mkdir -p
+#19 2.570 checking for gawk... no
+#19 2.570 checking for mawk... mawk
+#19 2.571 checking whether make sets $(MAKE)... yes
+#19 2.576 checking whether make supports nested variables... yes
+#19 2.582 checking for gcc... /afl/afl-clang-fast
+#19 2.637 checking whether the C compiler works... no
+#19 2.650 configure: error: in `/src/proj.4':
+#19 2.651 configure: error: C compiler cannot create executables
+#19 2.651 See `config.log' for more details
+#19 2.663 Traceback (most recent call last):
+#19 2.663   File "<string>", line 1, in <module>
+#19 2.663   File "/src/fuzzers/lafintel/fuzzer.py", line 53, in build
+#19 2.663     utils.build_benchmark()
+#19 2.664   File "/src/fuzzers/utils.py", line 76, in build_benchmark
+#19 2.664     subprocess.check_call(['/bin/bash', '-ex', build_script], env=env)
+#19 2.664   File "/usr/local/lib/python3.8/subprocess.py", line 364, in check_call
+#19 2.664     raise CalledProcessError(retcode, cmd)
+#19 2.664 subprocess.CalledProcessError: Command '['/bin/bash', '-ex', '/src/build.sh']' returned non-zero exit status 77.
+#19 ERROR: executor failed running [/bin/sh -c PYTHONPATH=$SRC python3 -u -c "from fuzzers import utils; utils.initialize_env(); from fuzzers.$FUZZER import fuzzer; fuzzer.build()"]: runc did not terminate sucessfully
+------
+ > importing cache manifest from gcr.io/fuzzbench/builders/lafintel/proj4_standard_fuzzer:
+------
+------
+ > [stage-1 12/12] RUN PYTHONPATH=/src python3 -u -c "from fuzzers import utils; utils.initialize_env(); from fuzzers.lafintel import fuzzer; fuzzer.build()":
+------
+failed to solve with frontend dockerfile.v0: failed to build LLB: executor failed running [/bin/sh -c PYTHONPATH=$SRC python3 -u -c "from fuzzers import utils; utils.initialize_env(); from fuzzers.$FUZZER import fuzzer; fuzzer.build()"]: runc did not terminate sucessfully
+make: *** [docker/generated.mk:65874: .lafintel-proj4_standard_fuzzer-builder] Error 1

@@ -43,7 +43,7 @@ def get_ground_truth_data():
         reverse_lookup = {**reverse_lookup, **{x[1]:(x[0], project_name) for x in zip(ids, keys)}}
     return projects, reverse_lookup, all_ids
 
-def get_bugs_found():
+def get_bugs_found(groupby_trial=True):
     data_path = os.path.join(report_directory, 'data.csv.gz')
     experiment_df = pd.read_csv(data_path)
     description = "from cached data"
@@ -64,17 +64,18 @@ def get_bugs_found():
     plotter = plotting.Plotter(fuzzer_names, True, False)
     grouping1 = ['fuzzer', 'benchmark', 'trial_id', 'crash_key']
     grouping2 = ['fuzzer', 'benchmark', 'trial_id']
+    final_grouping = grouping2 if groupby_trial else ['benchmark','fuzzer']
     grouping3 = ['fuzzer', 'benchmark', 'trial_id', 'time']
     df = experiment_df.sort_values(grouping3)
     df = df.apply(lambda x: np.where(x.isna(),"",x))
     df = df[~df.duplicated(subset=grouping1)]
-    df2 = df.groupby(grouping2)['crash_key'].apply(lambda x: set(x)-{""})
+    df2 = df.groupby(final_grouping)['crash_key'].apply(lambda x: set(x)-{""})
     bugs_found = df2.to_dict()
     return bugs_found
 
 def save_hits_misses():
-    projects, reverse_lookup, all_ids = ground_truth.get_ground_truth_data()
-    bugs_found = ground_truth.get_bugs_found()
+    projects, reverse_lookup, all_ids = get_ground_truth_data()
+    bugs_found = get_bugs_found()
     ground_truth_found = []
     for key in bugs_found:
         hit = 0
@@ -88,8 +89,12 @@ def save_hits_misses():
             #print(key)
         ground_truth_found.append([*key,hit,miss])
     df = pd.DataFrame(ground_truth_found, columns=['fuzzer','benchmark','trial_id','hits', 'misses'])
+    df2 = df.copy()
+    df = df.groupby(["benchmark", "fuzzer"]).median()[["hits", "misses"]]
+    df["Hits, Misses"] = df["hits"].astype(str) + ", " + df["misses"].astype(str)
+    df = df["Hits, Misses"].unstack()
     df.to_csv(os.path.join(report_directory, "hits_and_misses.csv"))
-    return df
+    return df2
 
 def get_ground_truth_found():
     projects, reverse_lookup, all_ids = get_ground_truth_data()
@@ -105,3 +110,9 @@ def get_ground_truth_found():
                     res_projects[key[1]] = set()
                 res_projects[key[1]].add(reverse_lookup[crash_key][0])
     return res_projects
+
+def main():
+    save_hits_misses()
+
+if __name__ == "__main__":
+    main()

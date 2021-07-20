@@ -1,24 +1,17 @@
 from analysis import plotting, data_utils, experiment_results, coverage_data_utils
 import os
 import pandas as pd
-report_directory = "/home/vaush/Work/temp_reports_02_06_2021/"
-data_path = os.path.join(report_directory, 'data.csv.gz')
-experiment_df = pd.read_csv(data_path)
-description = "from cached data"
-data_utils.validate_data(experiment_df)
-experiment_df = data_utils.add_bugs_covered_column(experiment_df)
-fuzzers = ['afl', 'aflfast', 'aflsmart', 'aflplusplus', 'mopt', 'entropic', 'fairfuzz', 'libfuzzer', 'honggfuzz']
-experiment_df = data_utils.filter_fuzzers(experiment_df, fuzzers)
-experiment_df['benchmark'] = experiment_df['benchmark'].apply(lambda x: "php-execute" if ("php-fuzz-execute" in x) else ("php-parser" if ("php-fuzz-parser" in x) else str(x).split("_")[0]))
-grouping1 = ['fuzzer', 'benchmark', 'trial_id', 'crash_key']
-grouping2 = ['fuzzer', 'benchmark', 'trial_id']
-grouping3 = ['fuzzer', 'benchmark', 'trial_id', 'time']
 
-df = experiment_df.sort_values(grouping3)
-df2 = df.groupby(grouping2).time.max()
-l = list(list(zip(*(df2[df2 != 82800].index)))[2])
-df = df[~df.trial_id.isin(l)]
+import data_retrieval
+import sys
+if len(sys.argv) > 1:
+    t = int(sys.argv[1])
+else:
+    t = 0
+save_directory = data_retrieval.get_save_directory(t)
+df = data_retrieval.retrieve_data(t)
 benchmarks = list(df.benchmark.unique())
+fuzzers = ["afl", "aflfast", "aflplusplus", "aflsmart", "entropic", "fairfuzz", "honggfuzz", "libfuzzer", "mopt"]
 df = data_utils.drop_uninteresting_columns(df)
 df = df.groupby(['benchmark','fuzzer','trial_id']).max()
 benchmark_data = {}
@@ -49,11 +42,13 @@ for benchmark in benchmark_data:
             row_names.append(benchmark + "_" + str(i))
             i += 1
 new_df = pd.DataFrame(rows, columns=fuzzers, index=row_names)
-if data_utils.stat_tests.friedman_test(new_df) < 0.05:
+p_value = data_utils.stat_tests.friedman_test(new_df) 
+print("P_VALUE", "=", p_value)
+if p_value < 0.05:
     print("Friedman was significant")
     ph = data_utils.stat_tests.friedman_posthoc_tests(new_df)
-    truth_table = lambda x: True if (x != -1 and x < 0.05) else False
-    ph['conover'].applymap(truth_table).to_csv(os.path.join(report_directory, 'friedman_ph_conover_truth_table.csv'))
-    ph['nemenyi'].applymap(truth_table).to_csv(os.path.join(report_directory, 'friedman_ph_nemenyi_truth_table.csv'))
+    truth_table = lambda x: ("\cellcolor{lightgrey}"+str(round(x,3))) if (x != -1 and x < 0.05) else round(x,3)
+    ph['conover'].applymap(truth_table).to_csv(os.path.join(save_directory, 'friedman_ph_conover_truth_table.csv'))
+    ph['nemenyi'].applymap(truth_table).to_csv(os.path.join(save_directory, 'friedman_ph_nemenyi_truth_table.csv'))
 else:
     print("Friedman was not significant")
